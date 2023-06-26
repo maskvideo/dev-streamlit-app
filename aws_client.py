@@ -6,7 +6,7 @@ import numpy as np
 import retina
 
 from PIL import Image
-BUCKET_NAME = 'mask-video-frames' # replace with your bucket name
+BUCKET_NAME = 'face.mask' # replace with your bucket name
 KEY = 'people.jpg' # replace with your object key
 
 aws_access_key_id = os.environ.get('AWS_ACCESS_KEY_ID')
