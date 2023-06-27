@@ -121,8 +121,8 @@ if st.button("Mask video"):
 
             if st.button("Download Masked Video"):
                 prefix = 'unmasked_frames/'
+                st.markdown(f'<a href="file://{masked_video_filepath}" download>Click here to download</a>', unsafe_allow_html=True)
                 aws_client.delete_objects(prefix)
                 aws_client.delete_file(video_name)
-                st.markdown(f'<a href="file://{masked_video_filepath}" download>Click here to download</a>', unsafe_allow_html=True)
             else:
                 st.warning("No masked frames found. Please ensure you have clicked the 'Mask video' button.")
