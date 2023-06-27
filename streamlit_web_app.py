@@ -80,7 +80,6 @@ if uploaded_file is not None:
 if st.button("Process video") and uploaded_file is not None:
     with st.spinner("Extracting frames from video..."):
         extract_frames.extract_frames_from_video(aws_client.get_video_url(video_name))
-    aws_client.delete_file(video_name)
 
 # TODO: convert this to work with s3
 if st.button("Mask video"):
@@ -124,5 +123,6 @@ if st.button("Mask video"):
                 st.markdown(f'<a href="file://{masked_video_filepath}" download>Click here to download</a>', unsafe_allow_html=True)
                 prefix = 'unmasked_frames/'
                 aws_client.delete_objects(prefix)
+                aws_client.delete_file(video_name)
             else:
                 st.warning("No masked frames found. Please ensure you have clicked the 'Mask video' button.")
