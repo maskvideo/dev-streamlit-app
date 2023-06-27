@@ -94,6 +94,35 @@ if st.button("Mask video"):
             unmasked_np_img = cv2.imdecode(np.frombuffer(frame_obj, np.uint8), cv2.IMREAD_UNCHANGED)
             faces_locations = retina.all_faces_locations(unmasked_np_img)
             masked_frame = retina.update_parameters(unmasked_np_img, (kernel_size, kernel_size), epsilon, faces_locations)
-            masked_frames.append(masked_frame)          
+            masked_frames.append(masked_frame)   
+            st.write("Processing frame:", frame)       
         st.write("end mask")
-        
+                # Check if any masked frames are available
+        if masked_frames:
+            # Convert the PIL Image objects to NumPy arrays
+            masked_frames = [np.array(frame) for frame in masked_frames]
+            # Create a file uploader widget to allow the user to choose the file path for the masked video
+            masked_video_filepath = st.text_input("Enter a file path for the masked video", value="masked_video.mp4")
+
+            # Define the video codec and output parameters
+            fourcc = cv2.VideoWriter_fourcc(*"mp4v")
+            fps = 30.0  # Frames per second
+            frame_size = (masked_frames[0].shape[1], masked_frames[0].shape[0])
+
+            # Create the video writer
+            video_writer = cv2.VideoWriter(masked_video_filepath, fourcc, fps, frame_size)
+
+            # Write the masked frames to the video file
+            for frame in masked_frames:
+                frame_np = np.array(frame)
+                video_writer.write(frame_np)
+
+            # Release the video writer
+            video_writer.release()
+
+            if st.button("Download Masked Video"):
+                st.markdown(f'<a href="file://{masked_video_filepath}" download>Click here to download</a>', unsafe_allow_html=True)
+                prefix = 'unmasked_frames/'
+                aws_client.delete_objects(prefix)
+            else:
+                st.warning("No masked frames found. Please ensure you have clicked the 'Mask video' button.")
