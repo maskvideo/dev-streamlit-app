@@ -80,13 +80,19 @@ if st.button("Process video") and uploaded_file is not None:
         extract_frames.extract_frames_from_video(aws_client.get_video_url(video_name))
     aws_client.delete_file(video_name)
 
-# TODO: convert this to work with s3
 if st.button("Mask video"):
-    frames_files = extract_frames.sorted_frames_files()
-    st.write("start mask")
+    with st.spinner("Masking video..."):
+        frames_files = extract_frames.sorted_frames_files(aws_client.BUCKET_NAME, "unmasked_frames/")
+        st.write("start mask")
+        masked_frames = []
+        for frame in frames_files:
+            print(frame)
+            frame_obj = aws_client.s3_client.get_object(Bucket=aws_client.BUCKET_NAME, Key=frame)
+            frame_bytes = frame_obj['Body'].read()
 
-    for frame in frames_files:
-        faces_locations = retina.all_faces_locations("frames_from_video" + "/" + frame)
-        retina.update_parameters("frames_from_video" + "/" + frame, frame, (kernel_size, kernel_size), epsilon, faces_locations)
-
-    st.write("end mask")
+            unmasked_pil_img = PIL.Image.open(io.BytesIO(frame_bytes)).convert("RGB")
+            unmasked_np_img = np.array(unmasked_pil_img)
+            faces_locations = retina.all_faces_locations(unmasked_np_img)
+            masked_frame = retina.update_parameters(unmasked_np_img, (kernel_size, kernel_size), epsilon, faces_locations)
+            masked_frames.append(masked_frame)      
+        st.write("end mask")
