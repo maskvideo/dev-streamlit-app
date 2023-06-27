@@ -75,13 +75,10 @@ if uploaded_file is not None:
         # Get the name of the uploaded video
     st.write('Upload successful!')
 
-# Create a button to start processing the video
-# TODO: need to find a way to make this faster
-if st.button("Process video"):
+if st.button("Process video") and uploaded_file is not None:
     with st.spinner("Extracting frames from video..."):
-        extract_frames.extract_frames_from_video(aws_client.get_video_url("world.mp4"))
-
-    # groups = [frames_files[i:i + 100] for i in range(0, len(frames_files), 100)]
+        extract_frames.extract_frames_from_video(aws_client.get_video_url(video_name))
+    aws_client.delete_file(video_name)
 
 # TODO: convert this to work with s3
 if st.button("Mask video"):

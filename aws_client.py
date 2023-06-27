@@ -53,6 +53,10 @@ def get_video_url(file_name):
     )
     return url
 
+def delete_file(file_key):
+    s3 = s3_client
+    bucket_name = BUCKET_NAME
+    s3.delete_object(Bucket=bucket_name, Key=file_key)
 
 
 
