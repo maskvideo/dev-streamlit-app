@@ -8,6 +8,7 @@ import time
 import multiprocessing
 import aws_client
 import re
+import natsort
 
 
 UNMASKED_FRAMES_DIR = "frames_from_video"
@@ -85,9 +86,9 @@ def extract_frames_from_video(video_url):
 def frame_sort_key(frame):
     match = re.match(r"frame0-(\d+)-(\d+)\.(\d+).jpg", frame)
     if match:
-        hour = int(match.group(1))
-        minute = int(match.group(2))
-        second = float(match.group(3))
+        hour = match.group(1).zfill(2)
+        minute = match.group(2).zfill(2)
+        second = match.group(3).zfill(3)
         return hour, minute, second
     return frame
 
@@ -98,7 +99,7 @@ def sorted_frames_files(bucket_name, prefix):
     for obj in response['Contents']:
         if obj['Key'].endswith('.jpg'):
             files.append(obj['Key'])
-    sorted_files = sorted(files, key=frame_sort_key)
+    sorted_files = natsort.natsorted(files, key=frame_sort_key)
     return sorted_files
 
 
