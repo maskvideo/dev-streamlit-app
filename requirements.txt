@@ -8,3 +8,4 @@ pyvirtualdisplay==2.2
 Pillow
 boto3
 numpy
+nutsort
