@@ -6,6 +6,7 @@ import cv2
 import numpy as np
 import aws_client
 import PIL.Image
+import io
 
 global kernel_size
 global epsilon
