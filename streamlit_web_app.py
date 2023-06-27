@@ -5,6 +5,7 @@ import extract_frames
 import cv2
 import numpy as np
 import aws_client
+import PIL.Image
 
 global kernel_size
 global epsilon
