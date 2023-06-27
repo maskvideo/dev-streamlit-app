@@ -7,6 +7,7 @@ import sys
 import time
 import multiprocessing
 import aws_client
+import re
 
 
 UNMASKED_FRAMES_DIR = "frames_from_video"
@@ -81,10 +82,24 @@ def extract_frames_from_video(video_url):
         # increment the frame count
         count += 1
 
+def frame_sort_key(frame):
+    match = re.match(r"frame0-(\d+)-(\d+)\.(\d+).jpg", frame)
+    if match:
+        hour = int(match.group(1))
+        minute = int(match.group(2))
+        second = float(match.group(3))
+        return hour, minute, second
+    return frame
 
-def sorted_frames_files():
-    return sorted(filter(lambda x: os.path.isfile(os.path.join(UNMASKED_FRAMES_DIR, x)),
-                                 os.listdir(UNMASKED_FRAMES_DIR)))
+def sorted_frames_files(bucket_name, prefix):
+    s3 = aws_client.s3_client
+    response = s3.list_objects_v2(Bucket=bucket_name, Prefix=prefix)
+    files = []
+    for obj in response['Contents']:
+        if obj['Key'].endswith('.jpg'):
+            files.append(obj['Key'])
+    sorted_files = sorted(files, key=frame_sort_key)
+    return sorted_files
 
 
 def masked_frame_group(frames_files, kernel, epsilon):
