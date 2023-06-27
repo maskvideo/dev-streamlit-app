@@ -16,7 +16,7 @@ def convert_bytes_to_opencv(bytes_image):
 
 def update_masked_image(masked):
     aws_client.upload_image_to_s3(masked)
-    st.write("Done uploading.")
+    st.write("")
 
     # display masked image
     masked_image_s3 = aws_client.image_from_s3(aws_client.BUCKET_NAME, "masked_people.jpg")
@@ -55,28 +55,24 @@ epsilon = st.slider("Choose coverage", 0, 40)
 if st.button("Update"):
     slider_value = (kernel_size, epsilon)
 if slider_value is not None:
-    with st.spinner("Applying mask..."):
+    with st.spinner(""):
         masked = retina.update_parameters(unmasked_pil_img, (kernel_size, kernel_size), epsilon, faces_locations)
         update_masked_image(masked)
 
-    with st.spinner("Applying mask..."):
+    with st.spinner(""):
         masked = retina.update_parameters(unmasked_pil_img, (kernel_size, kernel_size), epsilon, faces_locations)
         update_masked_image(masked)
 
-# Create a text input field for the video path
-video_path = st.text_input("Enter the path to the video file")
-
-# Force the text input field to lose focus
-st.write('')
-
-
+#upload video to the s3 bucket
 uploaded_file = st.file_uploader("Choose a video file", type=["mp4"])
-
+print(uploaded_file)
 # S3 upload logic
 if uploaded_file is not None:
-    s3 = boto3.client('s3')
+    s3 = boto3.client('s3', aws_access_key_id=aws_client.aws_access_key_id, aws_secret_access_key=aws_client.aws_secret_access_key)
     with st.spinner('Uploading...'):
-        s3.upload_fileobj(uploaded_file, aws_client.BUCKET_NAME, uploaded_file.name)
+        video_name = uploaded_file.name
+        s3.upload_fileobj(uploaded_file, aws_client.BUCKET_NAME, video_name)
+        # Get the name of the uploaded video
     st.write('Upload successful!')
 
 # Create a button to start processing the video
