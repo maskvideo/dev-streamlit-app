@@ -64,8 +64,6 @@ if slider_value is not None:
         masked = retina.update_parameters(unmasked_pil_img, (kernel_size, kernel_size), epsilon, faces_locations)
         update_masked_image(masked)
 
-# Create a text input field for the video path
-video_path = st.text_input("Enter the path to the video file")
 
 # Force the text input field to lose focus
 st.write('')
@@ -90,7 +88,7 @@ if st.button("Mask video") and uploaded_file is not None:
     with st.spinner("Extracting frames from video..."):
         fps = extract_frames.extract_frames_from_video(aws_client.get_video_url(unmasked_video_name))
     frames_files = extract_frames.sorted_frames_files(aws_client.BUCKET_NAME, "unmasked_frames/")
-    st.write("start masking the video. It might take a while...")
+    st.write("Start masking the video. It might take a while...")
 
     masked_frames = []
 
@@ -133,7 +131,11 @@ if st.button("Mask video") and uploaded_file is not None:
             data=open(masked_video_filepath, "rb").read(),
             file_name=masked_video_filepath
         )
-        aws_client.delete_file(unmasked_video_name)
-        aws_client.delete_folder("unmasked_frames/")
+        
+if st.button("Click here to free memory") and uploaded_file is not None:
+    aws_client.delete_file(unmasked_video_name)
+    aws_client.delete_file("masked_people.jpg")
+    aws_client.delete_folder("unmasked_frames/")
+    st.write("Thank you!")
 
         
