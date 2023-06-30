@@ -53,6 +53,20 @@ def get_video_url(file_name):
     )
     return url
 
+def delete_file(file_name):
+    s3_client.delete_object(Bucket=BUCKET_NAME, Key=file_name)
+
+
+def delete_folder(folder_name):
+    # List objects in the folder
+    response = s3_client.list_objects_v2(Bucket=BUCKET_NAME, Prefix=folder_name)
+
+    # Delete each object in the folder
+    if 'Contents' in response:
+        for obj in response['Contents']:
+            s3_client.delete_object(Bucket=BUCKET_NAME, Key=obj['Key'])
+
+
 
 
 
