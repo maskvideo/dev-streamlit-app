@@ -5,8 +5,10 @@ import extract_frames
 import cv2
 import numpy as np
 import aws_client
+
 global kernel_size
 global epsilon
+global fps
 
 
 def convert_bytes_to_opencv(bytes_image):
@@ -80,13 +82,15 @@ if uploaded_file is not None:
     st.write('Upload successful!')
 
 
+# Create a file uploader widget to allow the user to choose the file path for the masked video
+masked_video_filepath = st.text_input("Enter a file path for the masked video", value="masked_video.mp4")
 
 # TODO: convert this to work with s3
 if st.button("Mask video") and uploaded_file is not None:
     with st.spinner("Extracting frames from video..."):
-        extract_frames.extract_frames_from_video(aws_client.get_video_url(unmasked_video_name))
+        fps = extract_frames.extract_frames_from_video(aws_client.get_video_url(unmasked_video_name))
     frames_files = extract_frames.sorted_frames_files(aws_client.BUCKET_NAME, "unmasked_frames/")
-    st.write("start mask")
+    st.write("start masking the video. It might take a while...")
 
     masked_frames = []
 
@@ -102,4 +106,31 @@ if st.button("Mask video") and uploaded_file is not None:
         # Update the progress bar
         progress = (idx + 1) / len(frames_files)
         progress_bar.progress(progress)
-    st.write("end mask")
+    st.write("Masking completed. Go ahead and download the masked video!")
+
+    if masked_frames:
+        # Convert the PIL Image objects to NumPy arrays
+        masked_frames = [np.array(frame) for frame in masked_frames]
+
+        # Define the video codec and output parameters
+        fourcc = cv2.VideoWriter_fourcc(*"mp4v")
+        frame_size = (masked_frames[0].shape[1], masked_frames[0].shape[0])
+
+        # Create the video writer
+        video_writer = cv2.VideoWriter(masked_video_filepath, fourcc, fps, frame_size)
+
+        # Write the masked frames to the video file
+        for frame in masked_frames:
+            frame_np = np.array(frame)
+            video_writer.write(frame_np)
+
+        # Release the video writer
+        video_writer.release()
+
+        # Download the video file
+        st.download_button(
+            label="Download Masked Video",
+            data=open(masked_video_filepath, "rb").read(),
+            file_name=masked_video_filepath
+        )
+        
