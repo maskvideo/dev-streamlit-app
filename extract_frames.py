@@ -1,3 +1,4 @@
+import re
 from datetime import timedelta
 import cv2
 import numpy as np
@@ -82,46 +83,29 @@ def extract_frames_from_video(video_url):
         count += 1
 
 
-def sorted_frames_files():
-    return sorted(filter(lambda x: os.path.isfile(os.path.join(UNMASKED_FRAMES_DIR, x)),
-                                 os.listdir(UNMASKED_FRAMES_DIR)))
+def frame_sort_key(frame):
+    match = re.match(r"frame0-(\d+)-(\d+)\.(\d+).jpg", frame)
+    if match:
+        hour = match.group(1).zfill(2)
+        minute = match.group(2).zfill(2)
+        second = match.group(3).zfill(3)
+        return hour, minute, second
+    return frame
+
+
+def sorted_frames_files(bucket_name, prefix):
+    s3 = aws_client.s3_client
+    response = s3.list_objects_v2(Bucket=bucket_name, Prefix=prefix)
+    files = []
+    for obj in response['Contents']:
+        if obj['Key'].endswith('.jpg'):
+            files.append(obj['Key'])
+    sorted_files = sorted(files, key=frame_sort_key)
+    return sorted_files
 
 
 def masked_frame_group(frames_files, kernel, epsilon):
     for frame in frames_files:
         faces_locations = retina.all_faces_locations(frame)
         retina.update_parameters(frame, (kernel, kernel), epsilon, faces_locations)
-
-
-def main():
-    start = time.time()
-    video_file = sys.argv[1]
-
-    extract_frames_from_video(video_file)
-
-    frames_files = sorted_frames_files(UNMASKED_FRAMES_DIR)
-    os.mkdir(retina.MASKED_FRAMES_DIR)
-
-    groups = [frames_files[i:i + 100] for i in range(0, len(frames_files), 100)]
-
-    num_of_processes = multiprocessing.cpu_count()
-    print(num_of_processes)
-
-    """with multiprocessing.Pool(processes=num_of_processes) as pool:
-        pool.map(masked_frame_group, groups)"""
-
-    end = time.time()
-    print((end - start) / 60)
-
-
-
-
-
-
-
-if __name__ == "__main__":
-    main()
-
-
-
 
