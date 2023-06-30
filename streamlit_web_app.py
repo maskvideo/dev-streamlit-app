@@ -83,7 +83,7 @@ if uploaded_file is not None:
 
 
 # TODO: convert this to work with s3
-if st.button("Mask video"):
+if st.button("Mask video") and uploaded_file is not None:
     with st.spinner("Extracting frames from video..."):
         extract_frames.extract_frames_from_video(aws_client.get_video_url(unmasked_video_name))
     frames_files = extract_frames.sorted_frames_files(aws_client.BUCKET_NAME, "unmasked_frames/")
