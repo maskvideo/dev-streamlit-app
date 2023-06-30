@@ -81,6 +81,8 @@ def extract_frames_from_video(video_url):
                 pass
         # increment the frame count
         count += 1
+    return saving_frames_per_second
+
 
 
 def frame_sort_key(frame):
