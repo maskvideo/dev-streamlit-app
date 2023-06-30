@@ -5,7 +5,7 @@ import extract_frames
 import cv2
 import numpy as np
 import aws_client
-
+import tqdm
 global kernel_size
 global epsilon
 
@@ -91,7 +91,10 @@ if st.button("Mask video") and uploaded_file is not None:
 
     masked_frames = []
 
-    for frame in frames_files:
+    progress_bar = tqdm.tqdm(frames_files, desc="Processing frames", unit="frame")
+
+
+    for frame in progress_bar:
         frame_image_s3 = aws_client.image_from_s3(aws_client.BUCKET_NAME, frame)
         unmasked_frame_img = cv2.imdecode(np.frombuffer(frame_image_s3, np.uint8), cv2.IMREAD_COLOR)
         faces_locations = retina.all_faces_locations(unmasked_frame_img)
