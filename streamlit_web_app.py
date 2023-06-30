@@ -132,7 +132,7 @@ if st.button("Mask video") and uploaded_file is not None:
             file_name=masked_video_filepath
         )
         
-        st.button("Click here to free memory"):
+        st.button("Click here to free memory")
             aws_client.delete_file(unmasked_video_name)
             aws_client.delete_file("masked_people.jpg")
             aws_client.delete_folder("unmasked_frames/")
