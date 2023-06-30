@@ -8,4 +8,5 @@ pyvirtualdisplay==2.2
 Pillow
 boto3
 numpy
-tqdm
+tqdm==4.62.1
+
