@@ -76,24 +76,25 @@ uploaded_file = st.file_uploader("Choose a video file", type=["mp4"])
 if uploaded_file is not None:
     s3 = boto3.client('s3')
     with st.spinner('Uploading...'):
-        s3.upload_fileobj(uploaded_file, aws_client.BUCKET_NAME, uploaded_file.name)
+        unmasked_video_name = uploaded_file.name
+        s3.upload_fileobj(uploaded_file, aws_client.BUCKET_NAME, unmasked_video_name)
     st.write('Upload successful!')
 
-# Create a button to start processing the video
-# TODO: need to find a way to make this faster
-if st.button("Process video"):
-    with st.spinner("Extracting frames from video..."):
-        extract_frames.extract_frames_from_video(aws_client.get_video_url("world.mp4"))
 
-    # groups = [frames_files[i:i + 100] for i in range(0, len(frames_files), 100)]
 
 # TODO: convert this to work with s3
 if st.button("Mask video"):
-    frames_files = extract_frames.sorted_frames_files()
+    with st.spinner("Extracting frames from video..."):
+        extract_frames.extract_frames_from_video(aws_client.get_video_url(unmasked_video_name))
+    frames_files = extract_frames.sorted_frames_files(aws_client.BUCKET_NAME, "unmasked_frames/")
     st.write("start mask")
 
+    masked_frames = []
+
     for frame in frames_files:
-        faces_locations = retina.all_faces_locations("frames_from_video" + "/" + frame)
-        retina.update_parameters("frames_from_video" + "/" + frame, frame, (kernel_size, kernel_size), epsilon, faces_locations)
+        frame_image_s3 = aws_client.image_from_s3(aws_client.BUCKET_NAME, frame)
+        unmasked_frame_img = cv2.imdecode(np.frombuffer(frame_image_s3, np.uint8), cv2.IMREAD_COLOR)
+        faces_locations = retina.all_faces_locations(unmasked_frame_img)
+        masked_frames.append(retina.update_parameters(unmasked_frame_img, (kernel_size, kernel_size), epsilon, faces_locations))
 
     st.write("end mask")
