@@ -39,6 +39,16 @@ def update_parameters(unmasked_frame, kernel_size, epsilon, faces_locations):
         y1 -= epsilon
         x2 += epsilon
         y2 += epsilon
+
+        # Ensure face region is within image boundaries
+        x1 = max(0, x1)
+        y1 = max(0, y1)
+        x2 = min(x2, img.shape[1])
+        y2 = min(y2, img.shape[0])
+
+        # Check if face region is still valid
+        if x1 >= x2 or y1 >= y2:
+            continue
         face_img = img[y1:y2, x1:x2]
         if kernel_size[0] % 2 == 0 or kernel_size[0] < 1:
             kernel_dim = max(3, kernel_size[0] + 1)
