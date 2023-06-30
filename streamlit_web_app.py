@@ -51,7 +51,7 @@ masked = retina.update_parameters(unmasked_pil_img, (5,5), 10, faces_locations)
 frames_files = []
 
 
-kernel_size = st.slider("Choose blurr", 0, 100)
+kernel_size = st.slider("Choose blur", 0, 100)
 epsilon = st.slider("Choose coverage", 0, 40)
 if st.button("Update"):
     slider_value = (kernel_size, epsilon)
@@ -133,4 +133,7 @@ if st.button("Mask video") and uploaded_file is not None:
             data=open(masked_video_filepath, "rb").read(),
             file_name=masked_video_filepath
         )
+        aws_client.delete_file(unmasked_video_name)
+        aws_client.delete_folder("unmasked_frames/")
+
         
