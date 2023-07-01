@@ -125,17 +125,19 @@ if st.button("Mask video") and uploaded_file is not None:
         # Release the video writer
         video_writer.release()
 
-        # File download button
-        st.download_button(
-            label="Download Masked Video",
-            data=open(masked_video_filepath, "rb").read(),
-            file_name=masked_video_filepath,
-            key='download_button'
-        )
-
         # Deletion logic
         if st.button("Please click here to free memory first") and uploaded_file is not None:
             aws_client.delete_file(unmasked_video_name)
             aws_client.delete_file("masked_people.jpg")
             aws_client.delete_folder("unmasked_frames/")
-            st.write("Thank you! To mask another video please refresh the page.", unsafe_allow_html=True)
+            st.write("Thank you!", unsafe_allow_html=True)
+
+            # File download button
+            st.download_button(
+                label="Download Masked Video",
+                data=open(masked_video_filepath, "rb").read(),
+                file_name=masked_video_filepath,
+                key='download_button'
+            )
+
+        
