@@ -11,12 +11,11 @@ global epsilon
 global fps
 
 
-@st.cache_data
 def convert_bytes_to_opencv(bytes_image):
     np_img = cv2.imdecode(np.frombuffer(bytes_image, np.uint8), cv2.IMREAD_COLOR)
     return cv2.cvtColor(np_img, cv2.COLOR_RGB2BGR)
 
-@st.cache_resource 
+@st.cache_data 
 def update_masked_image(masked):
     aws_client.upload_image_to_s3(masked)
     st.write("Done uploading.")
