@@ -11,7 +11,6 @@ global epsilon
 global fps
 
 
-
 def convert_bytes_to_opencv(bytes_image):
     np_img = cv2.imdecode(np.frombuffer(bytes_image, np.uint8), cv2.IMREAD_COLOR)
     return cv2.cvtColor(np_img, cv2.COLOR_RGB2BGR)
@@ -105,8 +104,6 @@ if st.button("Mask video") and uploaded_file is not None:
         # Update the progress bar
         progress = (idx + 1) / len(frames_files)
         progress_bar.progress(progress)
-
-        
     st.write("Masking completed. Go ahead and download the masked video!")
 
     if masked_frames:
@@ -128,17 +125,17 @@ if st.button("Mask video") and uploaded_file is not None:
         # Release the video writer
         video_writer.release()
 
+        # File download button
+        st.download_button(
+            label="Download Masked Video",
+            data=open(masked_video_filepath, "rb").read(),
+            file_name=masked_video_filepath,
+            key='download_button'
+        )
+
+        # Deletion logic
         if st.button("Please click here to free memory first") and uploaded_file is not None:
             aws_client.delete_file(unmasked_video_name)
+            aws_client.delete_file("masked_people.jpg")
             aws_client.delete_folder("unmasked_frames/")
-            st.write("Thank you!", unsafe_allow_html=True)
-
-            # File download button
-            st.download_button(
-                label="Download Masked Video",
-                data=open(masked_video_filepath, "rb").read(),
-                file_name=masked_video_filepath,
-                key='download_button'
-            )
-
-        
+            st.write("Thank you! To mask another video please refresh the page.", unsafe_allow_html=True)
