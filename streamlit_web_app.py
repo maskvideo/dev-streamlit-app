@@ -106,7 +106,6 @@ if st.button("Mask video") and uploaded_file is not None:
         progress = (idx + 1) / len(frames_files)
         progress_bar.progress(progress)
 
-        st.experimental_rerun()
         
     st.write("Masking completed. Go ahead and download the masked video!")
 
