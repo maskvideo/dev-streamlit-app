@@ -10,9 +10,6 @@ global kernel_size
 global epsilon
 global fps
 
-global done_mask
-
-done_mask = False
 
 
 def convert_bytes_to_opencv(bytes_image):
@@ -131,9 +128,6 @@ if st.button("Mask video") and uploaded_file is not None:
         # Release the video writer
         video_writer.release()
 
-        done_mask = True
-
-    if done_mask:
         if st.button("Please click here to free memory first") and uploaded_file is not None:
             aws_client.delete_file(unmasked_video_name)
             aws_client.delete_folder("unmasked_frames/")
