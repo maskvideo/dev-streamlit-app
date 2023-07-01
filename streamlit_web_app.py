@@ -128,13 +128,11 @@ if st.button("Mask video") and uploaded_file is not None:
         # Deletion logic
         if st.button("Please click here to free memory first") and uploaded_file is not None:
             aws_client.delete_file(unmasked_video_name)
-            aws_client.delete_file("masked_people.jpg")
             aws_client.delete_folder("unmasked_frames/")
             st.session_state["memory_freed"] = True
-            st.session_state["show_download_button"] = True
             st.write("Thank you!", unsafe_allow_html=True)
             
-        if st.session_state.get("show_download_button", False):
+        if st.session_state.get("memory_freed", False):
 
             # File download button
             st.download_button(
