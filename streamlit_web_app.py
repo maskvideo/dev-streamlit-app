@@ -10,6 +10,8 @@ global kernel_size
 global epsilon
 global fps
 
+session_state = SessionState.get(memory_freed=False, show_download_button=False)
+
 
 def convert_bytes_to_opencv(bytes_image):
     np_img = cv2.imdecode(np.frombuffer(bytes_image, np.uint8), cv2.IMREAD_COLOR)
@@ -130,7 +132,10 @@ if st.button("Mask video") and uploaded_file is not None:
             aws_client.delete_file(unmasked_video_name)
             aws_client.delete_file("masked_people.jpg")
             aws_client.delete_folder("unmasked_frames/")
+            session_state.memory_freed = True
+            session_state.show_download_button = True
             st.write("Thank you!", unsafe_allow_html=True)
+        if session_state.show_download_button:
 
             # File download button
             st.download_button(
