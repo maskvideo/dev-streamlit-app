@@ -27,7 +27,7 @@ def update_masked_image(masked):
 
     image_placeholder.image(masked_opencv_img)
     
-def mask_frame(frame, kernel_size, epsilon):
+def mask_frame(frame):
     frame_image_s3 = aws_client.image_from_s3(aws_client.BUCKET_NAME, frame)
     unmasked_frame_img = cv2.imdecode(np.frombuffer(frame_image_s3, np.uint8), cv2.IMREAD_COLOR)
     faces_locations = retina.all_faces_locations(unmasked_frame_img)
