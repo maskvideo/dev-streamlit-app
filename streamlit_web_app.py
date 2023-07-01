@@ -5,8 +5,6 @@ import extract_frames
 import cv2
 import numpy as np
 import aws_client
-import concurrent.futures
-
 
 global kernel_size
 global epsilon
@@ -27,11 +25,7 @@ def update_masked_image(masked):
 
     image_placeholder.image(masked_opencv_img)
     
-def mask_frame(frame):
-    frame_image_s3 = aws_client.image_from_s3(aws_client.BUCKET_NAME, frame)
-    unmasked_frame_img = cv2.imdecode(np.frombuffer(frame_image_s3, np.uint8), cv2.IMREAD_COLOR)
-    faces_locations = retina.all_faces_locations(unmasked_frame_img)
-    return retina.update_parameters(unmasked_frame_img, (kernel_size, kernel_size), epsilon, faces_locations)
+    
 
 # Set the page title
 st.set_page_config(page_title="Mask Video File - Preview")
@@ -102,20 +96,13 @@ if st.button("Mask video") and uploaded_file is not None:
 
     progress_bar = st.progress(0)
 
-    # Create a ThreadPoolExecutor
-    executor = concurrent.futures.ThreadPoolExecutor()
-    
-    # Submit tasks to the executor
-    tasks = [executor.submit(mask_frame, frame) for frame in frames_files]
-    
-    # Create an iterator to track the progress
-    completed_tasks = concurrent.futures.as_completed(tasks)
 
-    for idx, task in enumerate(completed_tasks):
-        # Get the result of the task
-        masked_frame = task.result()
-        masked_frames.append(masked_frame)
-    
+    for idx, frame in enumerate(frames_files):
+        frame_image_s3 = aws_client.image_from_s3(aws_client.BUCKET_NAME, frame)
+        unmasked_frame_img = cv2.imdecode(np.frombuffer(frame_image_s3, np.uint8), cv2.IMREAD_COLOR)
+        faces_locations = retina.all_faces_locations(unmasked_frame_img)
+        masked_frames.append(retina.update_parameters(unmasked_frame_img, (kernel_size, kernel_size), epsilon, faces_locations))
+
         # Update the progress bar
         progress = (idx + 1) / len(frames_files)
         progress_bar.progress(progress)
