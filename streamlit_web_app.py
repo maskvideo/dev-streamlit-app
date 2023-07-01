@@ -5,6 +5,7 @@ import extract_frames
 import cv2
 import numpy as np
 import aws_client
+import time
 
 global kernel_size
 global epsilon
@@ -104,6 +105,9 @@ if st.button("Mask video") and uploaded_file is not None:
         # Update the progress bar
         progress = (idx + 1) / len(frames_files)
         progress_bar.progress(progress)
+
+        st.experimental_rerun()
+        
     st.write("Masking completed. Go ahead and download the masked video!")
 
     if masked_frames:
@@ -125,14 +129,14 @@ if st.button("Mask video") and uploaded_file is not None:
         # Release the video writer
         video_writer.release()
 
+        time.sleep(240)
+
         # Deletion logic
         if st.button("Please click here to free memory first") and uploaded_file is not None:
             aws_client.delete_file(unmasked_video_name)
             aws_client.delete_folder("unmasked_frames/")
-            st.session_state["memory_freed"] = True
             st.write("Thank you!", unsafe_allow_html=True)
-            
-        if st.session_state.get("memory_freed", False):
+            time.sleep(240)
 
             # File download button
             st.download_button(
