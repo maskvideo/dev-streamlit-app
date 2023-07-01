@@ -128,8 +128,6 @@ if st.button("Mask video") and uploaded_file is not None:
         # Release the video writer
         video_writer.release()
 
-        time.sleep(240)
-
         # Deletion logic
         if st.button("Please click here to free memory first") and uploaded_file is not None:
             aws_client.delete_file(unmasked_video_name)
