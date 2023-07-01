@@ -5,11 +5,12 @@ import extract_frames
 import cv2
 import numpy as np
 import aws_client
-import time
 
 global kernel_size
 global epsilon
 global fps
+
+global done_mask = False
 
 
 def convert_bytes_to_opencv(bytes_image):
@@ -128,12 +129,13 @@ if st.button("Mask video") and uploaded_file is not None:
         # Release the video writer
         video_writer.release()
 
-        # Deletion logic
+        done_mask = True
+
+    if done_mask:
         if st.button("Please click here to free memory first") and uploaded_file is not None:
             aws_client.delete_file(unmasked_video_name)
             aws_client.delete_folder("unmasked_frames/")
             st.write("Thank you!", unsafe_allow_html=True)
-            time.sleep(240)
 
             # File download button
             st.download_button(
