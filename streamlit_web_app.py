@@ -10,7 +10,9 @@ global kernel_size
 global epsilon
 global fps
 
-global done_mask = False
+global done_mask
+
+done_mask = False
 
 
 def convert_bytes_to_opencv(bytes_image):
